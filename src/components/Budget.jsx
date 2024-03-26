@@ -1,34 +1,67 @@
-import React, { useState, useContext } from 'react';
-import ViewBudget from './ViewBudget';
-import EditBudget from './EditBudget';
+import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 
+const BUDGET_MAX_VALUE = 20000;
+
 const Budget = () => {
-	const { budget, dispatch } = useContext(AppContext);
-	const [isEditing, setIsEditing] = useState(false);
+  const { budget, totalExpenses,currency, dispatch } = useContext(AppContext);
 
-	const handleEditClick = () => {
-		setIsEditing(true);
-	};
+  const onChangeBudgetHandler = (event) => {
+    const enteredValue = Number(event.target.value);
 
-	const handleSaveClick = (value) => {
-		dispatch({
-			type: 'SET_BUDGET',
-			payload: value,
-		});
-		setIsEditing(false);
-	};
+    // check if the entered value is a number
+    if (Number.isNaN(enteredValue)) {
+      alert('Please enter a valid number.');
+      return;
+    }
 
-	return (
-		<div class='alert alert-secondary p-3 d-flex align-items-center justify-content-between'>
-			{isEditing ? (
-				<EditBudget handleSaveClick={handleSaveClick} budget={budget} />
-			) : (
-				// For part 1 render component inline rather than create a seperate one
-				<ViewBudget handleEditClick={handleEditClick} budget={budget} />
-			)}
-		</div>
-	);
+    // check if the entered value is an integer number
+    if (!Number.isInteger(enteredValue)) {
+      alert('Please enter an integer number.');
+      return;
+    }
+
+    if (enteredValue < totalExpenses) {
+      alert(
+        "The value of the buget can't be lower than the expenses value " +
+          currency +
+          totalExpenses
+      );
+    } else {
+      if (enteredValue > BUDGET_MAX_VALUE) {
+        alert('Please enter a value less that ' + BUDGET_MAX_VALUE);
+        return;
+      }
+
+      dispatch({
+        type: 'SET_BUDGET',
+        payload: enteredValue,
+      });
+    }
+  };
+
+  return (
+    <div
+      className="alert alert-secondary"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+    >
+      <div>
+        <label htmlFor="budget">Budget:&nbsp;</label>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span>{currency}</span>
+        <input
+          required="required"
+          placeholder='enter your budget'
+          type="number"
+          id="budget"
+          value={budget}
+          step="10"
+          onChange={onChangeBudgetHandler}
+        ></input>
+      </div>
+    </div>
+  );
 };
 
 export default Budget;
